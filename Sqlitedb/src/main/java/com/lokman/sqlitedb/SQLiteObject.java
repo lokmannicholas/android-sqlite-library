@@ -7,8 +7,6 @@ import android.graphics.Bitmap;
 import android.util.Base64;
 import android.util.Log;
 
-import com.google.gson.Gson;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,8 +18,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -37,6 +37,7 @@ public  class SQLiteObject {
     private String[] table_fields;
     private Field[] fields;
     private Context context;
+
     protected SQLiteObject(){
         int count=0;
         fields = this.getClass().getDeclaredFields();
@@ -74,29 +75,42 @@ public  class SQLiteObject {
             String key = iter.next();
                 if(Arrays.asList(table_fields).contains(key)){
                     Object value = mJSONObject.get(key);
-                    if (value.getClass().equals(Bitmap.class)) {
-                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                        ((Bitmap)value).compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                        byte[] byteArray = byteArrayOutputStream .toByteArray();
-                        value = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
-                        mContentValues.put(key, String.valueOf(value));
-                    }else if (value.getClass().equals(Integer.class)){
+//                    if (value.getClass().equals(Bitmap.class)) {
+//                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                        ((Bitmap)value).compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+//                        byte[] byteArray = byteArrayOutputStream .toByteArray();
+//                        value = Base64.encodeToString(byteArray, Base64.DEFAULT);
+//
+//                        mContentValues.put(key, String.valueOf(value));
+//                    }else
+                    //Integer
+                    if (value.getClass().equals(Integer.class)){
                         mContentValues.put(key, Integer.valueOf((Integer) value));
-                    }else if (value.getClass().equals(List.class) || value.getClass().equals(ArrayList.class)){
+                    }
+                    //List
+                    else if (value.getClass().equals(List.class) || value.getClass().equals(ArrayList.class)){
                         JSONArray jsonarry = new JSONArray();
                         for (Object i : (List<Object>) value){
                             jsonarry.put(toJSON(i));
                         }
                         mContentValues.put(key,jsonarry.toString());
-                    }else if (value.getClass().isArray()){
+                    }
+                    //Array
+                    else if (value.getClass().isArray()){
                         JSONArray jsonarry = new JSONArray();
                         for (Object i : (Object[]) value){
                             jsonarry.put(toJSON(i));
                         }
 
                         mContentValues.put(key,jsonarry.toString());
-                    }else {
+                    }
+                    //Date
+                    else if(value.getClass().equals(Date.class)){
+
+                        mContentValues.put(key, SQLiteType.dateformate.format(value));
+                    }
+                    //String Float Double Date
+                    else if (value.getClass().equals(String.class) || value.getClass().equals(Float.class) || value.getClass().equals(Double.class)){
                         mContentValues.put(key,String.valueOf(value));
                     }
 
@@ -142,8 +156,8 @@ public  class SQLiteObject {
             for (int i = 0; i < totalColumn; i++) {
                 if (multi_cursor.getColumnName(i) != null) {
                     try {
-//                        rowObject.put(multi_cursor.getColumnName(i),
-//                                multi_cursor.getString(i));
+                        rowObject.put(multi_cursor.getColumnName(i),
+                                multi_cursor.getString(i));
                     } catch (Exception e) {
 
                     }
@@ -167,13 +181,14 @@ public  class SQLiteObject {
             for(Field field : vObject.getClass().getDeclaredFields()){
                 field.setAccessible(true);
                 Object value = field.get(vObject);
-                if (value.getClass().equals(Bitmap.class)) {
-                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                    ((Bitmap)value).compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-                    byte[] byteArray = byteArrayOutputStream .toByteArray();
-                    value = Base64.encodeToString(byteArray, Base64.DEFAULT);
-                    jobject.put(field.getName(), value);
-                }else if (value.getClass().equals(Integer.class)){
+//                if (value.getClass().equals(Bitmap.class)) {
+//                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+//                    ((Bitmap)value).compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+//                    byte[] byteArray = byteArrayOutputStream .toByteArray();
+//                    value = Base64.encodeToString(byteArray, Base64.DEFAULT);
+//                    jobject.put(field.getName(), value);
+//                }else
+                if (value.getClass().equals(Integer.class)){
                     jobject.put(field.getName(), Integer.valueOf((Integer) value));
                 }else if (value.getClass().equals(List.class) || value.getClass().equals(ArrayList.class)){
                     JSONArray jsonarry = new JSONArray();
@@ -189,7 +204,13 @@ public  class SQLiteObject {
                     }
 
                     jobject.put(field.getName(), jsonarry);
-                }else {
+
+                }
+                else if(value.getClass().equals(Date.class)){
+                    jobject.put(field.getName(), SQLiteType.dateformate.format(value));
+                }
+                else if (value.getClass().equals(String.class) || value.getClass().equals(Float.class) || value.getClass().equals(Double.class)){
+
                     jobject.put(field.getName(), String.valueOf(value));
                 }
             }
@@ -211,11 +232,13 @@ public  class SQLiteObject {
         try{
             //create an object by class  and json
             Class<?> clazz = Class.forName(cls.getName());
-            Constructor<?> ctor = clazz.getConstructor(String.class);
-            Object object = ctor.newInstance(cls.getDeclaredFields());
+            cls.getConstructors()
+            Constructor<?> constructor = clazz.getConstructor();
+            Object object = constructor.newInstance();
+
             return object;
         }catch (Exception exp){
-
+            Log.d("debug",exp.getMessage());
         }
         return null;
     }

@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         try {
-            TestClass tc =  new TestClass(this);
+            TestClass tc =  new TestClass();
             tc.initSQLite(this); //init sqlite database
 //            tc.save();
             String json = tc.toJSON();

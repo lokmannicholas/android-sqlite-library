@@ -16,12 +16,10 @@ class TestClass extends SQLiteObject{
     public int id=1;
     public String name="hi";
     String l="123";
-    Bitmap m ;
     TestClassm[] ls = new TestClassm[1];
 
-    public TestClass(Context context){
-       m = BitmapFactory.decodeResource(context.getResources(),
-               R.mipmap.ic_launcher);
+    public TestClass(){
+        super();
         ls[0]=new TestClassm();
     }
     public void setName(String name){
