@@ -20,9 +20,10 @@ public class SQLiteType {
             return "REAL";
         }else if(type == double.class){
             return "REAL";
-        }else if(type == Date.class){
-            return "TEXT";
         }
+//        else if(type == Date.class){
+//            return "TEXT";
+//        }
 
         return "TEXT";
     }

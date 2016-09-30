@@ -24,6 +24,8 @@ public class SQLiteDB extends SQLiteOpenHelper{
     private static final String DATABASE_NAME = "mydata.db";
     private String table_name = "";
     private String[] table_fields;
+
+
     public SQLiteDB(Context context, String tablename,Field[] fields) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
         this.table_name = tablename;

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import com.lokman.sqlitedb.SQLiteObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,10 +18,10 @@ class TestClass extends SQLiteObject{
     public String name="hi";
     String l="123";
     TestClassm[] ls = new TestClassm[1];
-
-    public TestClass(){
+    Date ssD;
+    public TestClass(String l){
         super();
-        ls[0]=new TestClassm();
+
     }
     public void setName(String name){
         this.name = name;
@@ -28,6 +29,9 @@ class TestClass extends SQLiteObject{
     public String getName(){
         return this.name;
     }
-
+    public void setLs(){
+        ls[0]=new TestClassm();
+        ssD = new Date();
+    }
 
 }
